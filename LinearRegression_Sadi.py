@@ -1,75 +1,64 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Mar 15 04:18:20 2018
-
-@author: Ahmet Basol
-"""
-
-#1. kutuphaneler
+# %%
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
+import matplotlib.pyplot as plt
 
-#2. Veri Onisleme
+# %%
+df = pd.read_csv("Salary_Data.csv")
+print(df.sample(3))
+print(df.isna().sum())
+print("\n", df.describe())
 
-#2.1. Veri Yukleme
-veriler = pd.read_csv('satislar.csv')
-#pd.read_csv("veriler.csv")
-
-
-#veri on isleme
-aylar = veriler[['Aylar']]
-#test
-print(aylar)
-
-satislar = veriler[['Satislar']]
-print(satislar)
-
-
-#verilerin egitim ve test icin bolunmesi
-from sklearn.model_selection import train_test_split
-x_train, x_test,y_train,y_test = train_test_split(aylar,satislar,test_size=0.33)
-'''
-#verilerin olceklenmesi
-from sklearn.preprocessing import StandardScaler
-
-
-sc = StandardScaler()
-X_train = sc.fit_transform(x_train)
-X_test = sc.fit_transform(x_test)
-Y_train = sc.fit_transform(y_train)
-Y_test = sc.fit_transform(y_test)
-'''
-
-print("asdas")
-# model inşası (linear regression)
-from sklearn.linear_model import LinearRegression
-lr = LinearRegression()
-lr.fit(x_train,y_train)
-
-tahmin = lr.predict(x_test)
-
-print(tahmin)
-
-
-x_train = x_train.sort_index()
-y_train = y_train.sort_index()
-tahmin = pd.DataFrame(tahmin).sort_index()
-y_test = y_test.sort_index()
-
-plt.figure(figsize=(30, 10))
-plt.title("Linear Model Result")
-plt.plot(x_test, "-o")
-plt.plot(tahmin, "-*")
-plt.legend(["Pred", "Actual"])
-plt.grid(True)
+plt.scatter(df["YearsExperience"], df["Salary"]) #verinin grafikteki saçılmasını gösterir
+plt.xlabel("YearsExperience")
+plt.ylabel("Salary")
 plt.show()
 
-print(x_train.shape)
-print(x_test.shape)
-print(y_train.shape)
-print(y_test.shape)
-print(tahmin.shape)
-#plt.plot(x_train,y_train)
-#plt.plot(x_test,tahmin)
+x = df['YearsExperience']
+y = df['Salary']
+
+# %%
+from sklearn.model_selection import train_test_split
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.6, random_state=1)
+x_train = x_train.sort_index()
+y_train = y_train.sort_index()
+print(x_train.shape, y_train.shape)
+
+# %%
+from sklearn.linear_model import LinearRegression
+
+X_train = pd.DataFrame(x_train)
+X_test = pd.DataFrame(x_test)
+Y_train = pd.DataFrame(y_train)
+Y_test = pd.DataFrame(y_test)
+# print("\n",X_train,"\n",Y_test)
+
+lr = LinearRegression()
+lr.fit(X_train, Y_train)
+
+Y_pred = lr.predict(X_test)
+print("\n", Y_pred, "\n", Y_test)
+
+# %%
+from sklearn.metrics import r2_score, mean_squared_error
+
+r2s = r2_score(Y_test,Y_pred)
+mse = mean_squared_error(Y_test,Y_pred)
+
+
+print("\nmean squared error is: ", mse)
+
+print("\ncofficient is:", lr.coef_)
+print("\nthe intercept is: ", lr.intercept_)
+
+# %%
+m = [i for i in range (1, len(Y_test)+1)]
+plt.plot(m, Y_test, color='r', linestyle='-')
+plt.plot(m, Y_pred, color='b', linestyle='-')
+plt.xlabel('Salary')
+plt.ylabel("index")
+plt.title("prediction")
+plt.show()
+
+print("\nr2score is: ", r2s)
